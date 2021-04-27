@@ -6,7 +6,7 @@ version: 0.2.2+1
 
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
   # Flutter versions prior to 1.12 did not support the
   # flutter.plugin.platforms map.
   flutter: ">=1.12.0"
@@ -16,7 +16,7 @@ dependencies:
     sdk: flutter
 
   # library for showing a color picker
-  flutter_material_color_picker: ^1.0.5
+  #flutter_material_color_picker: ^1.0.5
 
   # library to access storage directories
   path_provider: ^2.0.1

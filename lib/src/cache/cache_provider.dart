@@ -49,13 +49,13 @@ abstract class CacheProvider {
 
   Future<void> init();
 
-  int getInt(String key);
+  int? getInt(String key);
 
-  String getString(String key);
+  String? getString(String key);
 
-  double getDouble(String key);
+  double? getDouble(String key);
 
-  bool getBool(String key);
+  bool? getBool(String key);
 
   Future<void> setInt(String key, int value);
 

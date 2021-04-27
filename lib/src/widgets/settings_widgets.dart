@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
+//import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:flutter_settings_screens/src/utils/utils.dart';
 import 'package:flutter_settings_screens/src/utils/widget_utils.dart';
@@ -36,20 +36,20 @@ class SimpleSettingsTile extends StatelessWidget {
   final String subtitle;
 
   /// widget to be placed at first in the tile
-  final Widget leading;
+  final Widget? leading;
 
   /// flag which represents the state of the settings, if false the the tile will
   /// ignore all the user inputs, default = true
   final bool enabled;
 
   /// widget that will be displayed on tap of the tile
-  final Widget child;
+  final Widget? child;
 
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   SimpleSettingsTile({
-    @required this.title,
-    this.subtitle,
+    required this.title,
+    this.subtitle = '',
     this.child,
     this.enabled = true,
     this.leading,
@@ -80,7 +80,7 @@ class SimpleSettingsTile extends StatelessWidget {
 
     if (child != null) {
       Navigator.of(context).push(MaterialPageRoute(
-        builder: (BuildContext context) => child,
+        builder: (BuildContext context) => child!,
       ));
     }
   }
@@ -122,7 +122,7 @@ class ModalSettingsTile<T> extends StatelessWidget {
   final String subtitle;
 
   /// widget to be placed at first in the tile
-  final Widget leading;
+  final Widget? leading;
 
   /// flag which represents the state of the settings, if false the the tile will
   /// ignore all the user inputs, default = true
@@ -132,16 +132,16 @@ class ModalSettingsTile<T> extends StatelessWidget {
   final List<Widget> children;
 
   final bool showConfirmation;
-  final VoidCallback onCancel;
-  final OnConfirmedCallback onConfirm;
+  final VoidCallback? onCancel;
+  final OnConfirmedCallback? onConfirm;
 
   ModalSettingsTile({
-    @required this.title,
+    required this.title,
     this.subtitle = '',
-    this.children,
+    required this.children,
     this.enabled = true,
     this.leading,
-    this.showConfirmation,
+    this.showConfirmation = false,
     this.onCancel,
     this.onConfirm,
   });
@@ -196,7 +196,7 @@ class ExpandableSettingsTile extends StatelessWidget {
   final String subtitle;
 
   /// widget to be placed at first in the tile
-  final Widget leading;
+  final Widget? leading;
 
   /// flag which represents the state of the settings, if false the the tile will
   /// ignore all the user inputs, default = true
@@ -210,9 +210,9 @@ class ExpandableSettingsTile extends StatelessWidget {
   final bool expanded;
 
   ExpandableSettingsTile({
-    @required this.title,
+    required this.title,
     this.subtitle = '',
-    this.children,
+    required this.children,
     this.enabled = true,
     this.expanded = false,
     this.leading,
@@ -257,7 +257,7 @@ class SettingsContainer extends StatelessWidget {
   final double leftPadding;
 
   SettingsContainer({
-    this.children,
+    required this.children,
     this.allowScrollInternally = false,
     this.leftPadding = 0.0,
   });
@@ -341,9 +341,9 @@ class SettingsGroup extends StatelessWidget {
   final List<Widget> children;
 
   SettingsGroup({
-    @required this.title,
-    this.subtitle,
-    @required this.children,
+    required this.title,
+    this.subtitle = '',
+    required this.children,
   });
 
   @override
@@ -461,31 +461,31 @@ class TextInputSettingsTile extends StatefulWidget {
   final bool autoFocus;
 
   /// on change callback for handling the value change
-  final OnChanged<String> onChange;
+  final OnChanged<String>? onChange;
 
   /// validator for input validation
-  final FormFieldValidator<String> validator;
+  final FormFieldValidator<String>? validator;
 
   /// flag which represents the state of obscureText in the [TextFormField]
   ///  default = false
   final bool obscureText;
 
   /// Color of the border of the [TextFormField]
-  final Color borderColor;
+  final Color? borderColor;
 
   /// Color of the border of the [TextFormField], when there's an error
   /// or input is not passed through the validation
-  final Color errorColor;
+  final Color? errorColor;
 
   /// [TextInputType] of the [TextFormField] to set the keyboard type to name, phone, etc.
-  final TextInputType keyboardType;
+  final TextInputType? keyboardType;
 
   TextInputSettingsTile({
-    @required this.title,
-    @required this.settingKey,
+    required this.title,
+    required this.settingKey,
     this.initialValue = '',
     this.enabled = true,
-    this.autoValidateMode,
+    this.autoValidateMode = AutovalidateMode.disabled,
     this.autoFocus = true,
     this.onChange,
     this.validator,
@@ -501,8 +501,8 @@ class TextInputSettingsTile extends StatefulWidget {
 
 class _TextInputSettingsTileState extends State<TextInputSettingsTile> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  TextEditingController _controller;
-  FocusNode _focusNode;
+  TextEditingController? _controller;
+  FocusNode? _focusNode;
 
   @override
   void initState() {
@@ -518,14 +518,14 @@ class _TextInputSettingsTileState extends State<TextInputSettingsTile> {
       defaultValue: widget.initialValue,
       builder:
           (BuildContext context, String value, OnChanged<String> onChanged) {
-        _controller.text = value;
+        _controller!.text = value;
         return _ModalSettingsTile<String>(
           title: widget.title,
           subtitle: widget.obscureText ? '' : value,
           showConfirmation: true,
-          onConfirm: () => _submitText(_controller.text),
+          onConfirm: () => _submitText(_controller!.text),
           onCancel: () {
-            _controller.text = Settings.getValue(widget.settingKey, '');
+            _controller!.text = Settings.getValue(widget.settingKey, '');
           },
           children: <Widget>[
             _buildTextField(context, value, onChanged),
@@ -551,7 +551,7 @@ class _TextInputSettingsTileState extends State<TextInputSettingsTile> {
           autovalidateMode: autoValidateMode,
           enabled: widget.enabled,
           validator: widget.enabled ? widget.validator : null,
-          onSaved: widget.enabled ? (value) => _onSave(value, onChanged) : null,
+          onSaved: widget.enabled ? (value) => _onSave(value??'', onChanged) : null,
           obscureText: widget.obscureText,
           keyboardType: widget.keyboardType,
           cursorColor: borderColor,
@@ -587,19 +587,18 @@ class _TextInputSettingsTileState extends State<TextInputSettingsTile> {
   }
 
   AutovalidateMode get autoValidateMode {
-    var autoValidateMode = widget.autoValidateMode ?? AutovalidateMode.disabled;
-    return autoValidateMode;
+    return widget.autoValidateMode;
   }
 
   bool _submitText(String newValue) {
     var isValid = true;
     final state = _formKey.currentState;
     if (state != null) {
-      isValid = state.validate() ?? false;
+      isValid = state.validate();
     }
 
     if (isValid) {
-      state.save();
+      state?.save();
       return true;
     }
 
@@ -607,11 +606,9 @@ class _TextInputSettingsTileState extends State<TextInputSettingsTile> {
   }
 
   void _onSave(String newValue, OnChanged<String> onChanged) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
       onChanged(newValue);
-      if (widget.onChange != null) {
-        widget.onChange(newValue);
-      }
+      widget.onChange?.call(newValue);
     });
   }
 }
@@ -678,10 +675,10 @@ class SwitchSettingsTile extends StatelessWidget {
   final bool enabled;
 
   /// on change callback for handling the value change
-  final OnChanged<bool> onChange;
+  final OnChanged<bool>? onChange;
 
   /// A Widget that will be displayed in the front of the tile
-  final Widget leading;
+  final Widget? leading;
 
   /// A specific text that will be displayed as subtitle when switch is set to enable state
   /// if provided, default = ''
@@ -696,15 +693,15 @@ class SwitchSettingsTile extends StatelessWidget {
   final List<Widget> childrenIfEnabled;
 
   SwitchSettingsTile({
-    @required this.title,
-    @required this.settingKey,
+    required this.title,
+    required this.settingKey,
     this.defaultValue = false,
     this.enabled = true,
     this.onChange,
     this.leading,
     this.enabledLabel = '',
     this.disabledLabel = '',
-    this.childrenIfEnabled,
+    this.childrenIfEnabled = const [],
     this.subtitle = '',
   });
 
@@ -739,11 +736,9 @@ class SwitchSettingsTile extends StatelessWidget {
   }
 
   Future<void> _onSwitchChange(
-      BuildContext context, bool value, OnChanged<bool> onChanged) async {
-    onChanged(value);
-    if (onChange != null) {
-      onChange(value);
-    }
+      BuildContext context, bool value, OnChanged<bool>? onChanged) async {
+    onChanged?.call(value);
+    onChange?.call(value);
   }
 
   String getSubtitle(bool currentStatus) {
@@ -833,10 +828,10 @@ class CheckboxSettingsTile extends StatelessWidget {
   final bool enabled;
 
   /// on change callback for handling the value change
-  final OnChanged<bool> onChange;
+  final OnChanged<bool?>? onChange;
 
   /// A Widget that will be displayed in the front of the tile
-  final Widget leading;
+  final Widget? leading;
 
   /// A specific text that will be displayed as subtitle when checkbox is set to enable state
   /// if provided, default = ''
@@ -851,30 +846,30 @@ class CheckboxSettingsTile extends StatelessWidget {
   final List<Widget> childrenIfEnabled;
 
   CheckboxSettingsTile({
-    @required this.title,
-    @required this.settingKey,
+    required this.title,
+    required this.settingKey,
     this.defaultValue = false,
     this.enabled = true,
     this.onChange,
     this.leading,
     this.enabledLabel = '',
     this.disabledLabel = '',
-    this.childrenIfEnabled,
+    this.childrenIfEnabled = const [],
     this.subtitle = '',
   });
 
   @override
   Widget build(BuildContext context) {
-    return ValueChangeObserver<bool>(
+    return ValueChangeObserver<bool?>(
       cacheKey: settingKey,
       defaultValue: defaultValue,
-      builder: (BuildContext context, bool value, OnChanged<bool> onChanged) {
+      builder: (BuildContext context, bool? value, OnChanged<bool?>? onChanged) {
         var mainWidget = _SettingsTile(
           leading: leading,
           title: title,
           enabled: enabled,
           subtitle: getSubtitle(value),
-          onTap: () => _onCheckboxChange(!value, onChanged),
+          onTap: () => _onCheckboxChange(value, onChanged),
           child: _SettingsCheckbox(
             value: value,
             onChanged: (value) => _onCheckboxChange(value, onChanged),
@@ -885,7 +880,7 @@ class CheckboxSettingsTile extends StatelessWidget {
         var finalWidget = getFinalWidget(
           context,
           mainWidget,
-          value,
+          value??false,
           childrenIfEnabled,
         );
         return finalWidget;
@@ -893,23 +888,21 @@ class CheckboxSettingsTile extends StatelessWidget {
     );
   }
 
-  Future<void> _onCheckboxChange(bool value, OnChanged<bool> onChanged) async {
-    onChanged(value);
-    if (onChange != null) {
-      onChange(value);
-    }
+  Future<void> _onCheckboxChange(bool? value, OnChanged<bool?>? onChanged) async {
+    onChanged?.call(value);
+    onChange?.call(value);
   }
 
-  String getSubtitle(bool currentStatus) {
+  String getSubtitle(bool? currentStatus) {
     if (subtitle != null && subtitle.isNotEmpty) {
       return subtitle;
     }
 
     var label = '';
-    if (currentStatus && enabledLabel.isNotEmpty) {
+    if (currentStatus??false && enabledLabel.isNotEmpty) {
       label = enabledLabel;
     }
-    if (!currentStatus && disabledLabel.isNotEmpty) {
+    if (!(currentStatus??false) && disabledLabel.isNotEmpty) {
       label = disabledLabel;
     }
     return label;
@@ -992,20 +985,20 @@ class RadioSettingsTile<T> extends StatefulWidget {
   final bool showTitles;
 
   /// on change callback for handling the value change
-  final OnChanged<T> onChange;
+  final OnChanged<T>? onChange;
 
   /// A Widget that will be displayed in the front of the tile
-  final Widget leading;
+  final Widget? leading;
 
   RadioSettingsTile({
-    @required this.title,
-    @required this.settingKey,
-    @required this.selected,
-    @required this.values,
+    required this.title,
+    required this.settingKey,
+    required this.selected,
+    required this.values,
     this.enabled = true,
     this.onChange,
     this.leading,
-    this.showTitles,
+    this.showTitles = false,
     this.subtitle = '',
   });
 
@@ -1014,7 +1007,7 @@ class RadioSettingsTile<T> extends StatefulWidget {
 }
 
 class _RadioSettingsTileState<T> extends State<RadioSettingsTile<T>> {
-  T selectedValue;
+  T? selectedValue;
 
   @override
   void initState() {
@@ -1022,9 +1015,9 @@ class _RadioSettingsTileState<T> extends State<RadioSettingsTile<T>> {
     selectedValue = widget.selected;
   }
 
-  Future<void> _onRadioChange(T value, OnChanged<T> onChanged) async {
+  Future<void> _onRadioChange(T value, OnChanged<T>? onChanged) async {
     selectedValue = value;
-    onChanged(value);
+    onChanged?.call(value);
     widget.onChange?.call(value);
   }
 
@@ -1032,17 +1025,16 @@ class _RadioSettingsTileState<T> extends State<RadioSettingsTile<T>> {
   Widget build(BuildContext context) {
     return ValueChangeObserver<T>(
       cacheKey: widget.settingKey,
-      defaultValue: selectedValue,
-      builder: (BuildContext context, T value, OnChanged<T> onChanged) {
+      defaultValue: selectedValue!,
+      builder: (BuildContext context, T value, OnChanged<T>? onChanged) {
         return SettingsContainer(
           children: <Widget>[
             Visibility(
               visible: showTitles,
               child: _SimpleHeaderTile(
                 title: widget.title,
-                subtitle: widget.subtitle != null && widget.subtitle.isNotEmpty
-                    ? widget.subtitle
-                    : widget.values[selectedValue],
+                subtitle: widget.subtitle != null && widget.subtitle.isNotEmpty ? widget.subtitle
+                    : widget.values[selectedValue!]??"",
                 leading: widget.leading,
               ),
             ),
@@ -1053,10 +1045,10 @@ class _RadioSettingsTileState<T> extends State<RadioSettingsTile<T>> {
     );
   }
 
-  bool get showTitles => widget.showTitles ?? true;
+  bool get showTitles => widget.showTitles;
 
   Widget _buildRadioTiles(
-      BuildContext context, T groupValue, OnChanged<T> onChanged) {
+      BuildContext context, T groupValue, OnChanged<T>? onChanged) {
     var radioList =
         widget.values.entries.map<Widget>((MapEntry<T, String> entry) {
       return _SettingsTile(
@@ -1138,13 +1130,13 @@ class DropDownSettingsTile<T> extends StatefulWidget {
   final bool enabled;
 
   /// on change callback for handling the value change
-  final OnChanged<T> onChange;
+  final OnChanged<T>? onChange;
 
   DropDownSettingsTile({
-    @required this.title,
-    @required this.settingKey,
-    @required this.selected,
-    @required this.values,
+    required this.title,
+    required this.settingKey,
+    required this.selected,
+    required this.values,
     this.enabled = true,
     this.onChange,
     this.subtitle = '',
@@ -1156,7 +1148,7 @@ class DropDownSettingsTile<T> extends StatefulWidget {
 }
 
 class _DropDownSettingsTileState<T> extends State<DropDownSettingsTile<T>> {
-  T selectedValue;
+  T? selectedValue;
 
   @override
   void initState() {
@@ -1168,7 +1160,7 @@ class _DropDownSettingsTileState<T> extends State<DropDownSettingsTile<T>> {
   Widget build(BuildContext context) {
     return ValueChangeObserver<T>(
       cacheKey: widget.settingKey,
-      defaultValue: selectedValue,
+      defaultValue: selectedValue!,
       builder: (BuildContext context, T value, OnChanged<T> onChanged) {
         return SettingsContainer(
           children: <Widget>[
@@ -1184,7 +1176,7 @@ class _DropDownSettingsTileState<T> extends State<DropDownSettingsTile<T>> {
                 },
                 enabled: widget.enabled,
                 itemBuilder: (T value) {
-                  return Text(widget.values[value]);
+                  return Text(widget.values[value]??'');
                 },
               ),
             )
@@ -1270,25 +1262,25 @@ class SliderSettingsTile extends StatefulWidget {
   final double step;
 
   /// on change callback for handling the value change
-  final OnChanged<double> onChange;
+  final OnChanged<double>? onChange;
 
   /// callback for fetching the value slider movement starts
-  final OnChanged<double> onChangeStart;
+  final OnChanged<double>? onChangeStart;
 
   /// callback for fetching the value slider movement ends
-  final OnChanged<double> onChangeEnd;
+  final OnChanged<double>? onChangeEnd;
 
   /// callback for fetching the value slider movement starts
-  final Widget leading;
+  final Widget? leading;
 
   SliderSettingsTile({
-    @required this.title,
-    @required this.settingKey,
+    required this.title,
+    required this.settingKey,
     this.defaultValue = 0.0,
     this.enabled = true,
     this.eagerUpdate = true,
-    @required this.min,
-    @required this.max,
+    required this.min,
+    required this.max,
     this.step = 1.0,
     this.onChange,
     this.onChangeStart,
@@ -1302,7 +1294,7 @@ class SliderSettingsTile extends StatefulWidget {
 }
 
 class _SliderSettingsTileState extends State<SliderSettingsTile> {
-  double currentValue;
+  double? currentValue;
 
   @override
   void initState() {
@@ -1314,7 +1306,7 @@ class _SliderSettingsTileState extends State<SliderSettingsTile> {
   Widget build(BuildContext context) {
     return ValueChangeObserver<double>(
       cacheKey: widget.settingKey,
-      defaultValue: currentValue,
+      defaultValue: currentValue!,
       builder:
           (BuildContext context, double value, OnChanged<double> onChanged) {
         debugPrint('creating settings Tile: ${widget.settingKey}');
@@ -1394,6 +1386,7 @@ class _SliderSettingsTileState extends State<SliderSettingsTile> {
 ///    },
 ///  );
 /// ```
+
 class ColorPickerSettingsTile extends StatefulWidget {
   /// Settings Key string for storing the state of Color picker in cache (assumed to be unique)
   final String settingKey;
@@ -1402,7 +1395,7 @@ class ColorPickerSettingsTile extends StatefulWidget {
   final String defaultStringValue;
 
   /// Default value of the color
-  final Color defaultValue;
+  final Color? defaultValue;
 
   /// title for the settings tile
   final String title;
@@ -1415,11 +1408,11 @@ class ColorPickerSettingsTile extends StatefulWidget {
   final bool enabled;
 
   /// on change callback for handling the value change
-  final OnChanged<Color> onChange;
+  final OnChanged<Color>? onChange;
 
   ColorPickerSettingsTile({
-    @required this.title,
-    @required this.settingKey,
+    required this.title,
+    required this.settingKey,
     this.defaultValue,
     this.enabled = true,
     this.onChange,
@@ -1433,14 +1426,14 @@ class ColorPickerSettingsTile extends StatefulWidget {
 }
 
 class _ColorPickerSettingsTileState extends State<ColorPickerSettingsTile> {
-  String currentValue;
+  late String currentValue;
 
   @override
   void initState() {
     super.initState();
 
     if (widget.defaultValue != null) {
-      currentValue = Utils.stringFromColor(widget.defaultValue);
+      currentValue = Utils.stringFromColor(widget.defaultValue!);
     } else {
       currentValue = widget.defaultStringValue;
     }
@@ -1470,7 +1463,7 @@ class _ColorPickerSettingsTileState extends State<ColorPickerSettingsTile> {
     onChanged(color);
     if (widget.onChange != null) {
       final colorFromString = Utils.colorFromString(color);
-      widget.onChange(colorFromString);
+      widget.onChange?.call(colorFromString);
     }
   }
 }
@@ -1527,13 +1520,13 @@ class RadioModalSettingsTile<T> extends StatefulWidget {
   final bool showTitles;
 
   /// on change callback for handling the value change
-  final OnChanged<T> onChange;
+  final OnChanged<T>? onChange;
 
   RadioModalSettingsTile({
-    @required this.title,
-    @required this.settingKey,
-    @required this.selected,
-    @required this.values,
+    required this.title,
+    required this.settingKey,
+    required this.selected,
+    required this.values,
     this.enabled = true,
     this.showTitles = false,
     this.onChange,
@@ -1546,7 +1539,7 @@ class RadioModalSettingsTile<T> extends StatefulWidget {
 }
 
 class _RadioModalSettingsTileState<T> extends State<RadioModalSettingsTile<T>> {
-  T selectedValue;
+  T? selectedValue;
 
   @override
   void initState() {
@@ -1564,13 +1557,13 @@ class _RadioModalSettingsTileState<T> extends State<RadioModalSettingsTile<T>> {
   Widget build(BuildContext context) {
     return ValueChangeObserver<T>(
       cacheKey: widget.settingKey,
-      defaultValue: selectedValue,
+      defaultValue: selectedValue!,
       builder: (BuildContext context, T value, OnChanged<T> onChanged) {
         return _ModalSettingsTile<T>(
           title: widget.title,
           subtitle: widget.subtitle != null && widget.subtitle.isNotEmpty
-              ? widget.subtitle
-              : widget.values[value],
+              ? (widget.subtitle)
+              : widget.values[value]??'',
           children: <Widget>[
             RadioSettingsTile(
               title: '',
@@ -1578,7 +1571,11 @@ class _RadioModalSettingsTileState<T> extends State<RadioModalSettingsTile<T>> {
               enabled: widget.enabled,
               values: widget.values,
               settingKey: widget.settingKey,
-              onChange: (value) => _onRadioChange(value, onChanged),
+              onChange: (T x) {
+				if (x!=null) {
+					_onRadioChange(x, onChanged);
+				}
+			  },
               selected: value,
             ),
           ],
@@ -1660,21 +1657,21 @@ class SliderModalSettingsTile extends StatefulWidget {
   final double step;
 
   /// on change callback for handling the value change
-  final OnChanged<double> onChange;
+  final OnChanged<double>? onChange;
 
   /// callback for fetching the value slider movement starts
-  final OnChanged<double> onChangeStart;
+  final OnChanged<double>? onChangeStart;
 
   /// callback for fetching the value slider movement ends
-  final OnChanged<double> onChangeEnd;
+  final OnChanged<double>? onChangeEnd;
 
   SliderModalSettingsTile({
-    @required this.title,
-    @required this.settingKey,
+    required this.title,
+    required this.settingKey,
     this.defaultValue = 0.0,
     this.enabled = true,
-    @required this.min,
-    @required this.max,
+    required this.min,
+    required this.max,
     this.step = 0.0,
     this.onChange,
     this.onChangeStart,
@@ -1689,7 +1686,7 @@ class SliderModalSettingsTile extends StatefulWidget {
 }
 
 class _SliderModalSettingsTileState extends State<SliderModalSettingsTile> {
-  double currentValue;
+  double? currentValue;
 
   @override
   void initState() {
@@ -1701,7 +1698,7 @@ class _SliderModalSettingsTileState extends State<SliderModalSettingsTile> {
   Widget build(BuildContext context) {
     return ValueChangeObserver<double>(
       cacheKey: widget.settingKey,
-      defaultValue: currentValue,
+      defaultValue: currentValue!,
       builder:
           (BuildContext context, double value, OnChanged<double> onChanged) {
         debugPrint('creating settings Tile: ${widget.settingKey}');
@@ -1801,13 +1798,13 @@ class SimpleRadioSettingsTile extends StatelessWidget {
   final bool enabled;
 
   /// on change callback for handling the value change
-  final OnChanged<String> onChange;
+  final OnChanged<String>? onChange;
 
   SimpleRadioSettingsTile({
-    @required this.title,
-    @required this.settingKey,
-    @required this.selected,
-    @required this.values,
+    required this.title,
+    required this.settingKey,
+    required this.selected,
+    required this.values,
     this.enabled = true,
     this.onChange,
     this.subtitle = '',
@@ -1882,13 +1879,13 @@ class SimpleDropDownSettingsTile extends StatelessWidget {
   final bool enabled;
 
   /// on change callback for handling the value change
-  final OnChanged<String> onChange;
+  final OnChanged<String>? onChange;
 
   SimpleDropDownSettingsTile({
-    @required this.title,
-    @required this.settingKey,
-    @required this.selected,
-    @required this.values,
+    required this.title,
+    required this.settingKey,
+    required this.selected,
+    required this.values,
     this.enabled = true,
     this.onChange,
     this.subtitle = '',
